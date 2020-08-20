@@ -5,9 +5,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
-
-//import 'dart:io';
+import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -15,11 +16,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-    stream: bloc.darkThemeEnabled,
-    initialData: false,
-    builder: (context, snapshot) => MaterialApp(
-        theme: snapshot.data ? ThemeData.dark() : ThemeData.light(),
-        home: MyHomePage("Women's Safety App (New)", snapshot.data)),
+      stream: bloc.darkThemeEnabled,
+      initialData: false,
+      builder: (context, snapshot) => MaterialApp(
+          theme: snapshot.data ? ThemeData.dark() : ThemeData.light(),
+          home: MyHomePage('Women\'s Safety App (New)', snapshot.data)),
     );
   }
 }
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatelessWidget {
   final String title;
   final bool darkThemeEnabled;
-
+  var cameras;
   MyHomePage(this.title, this.darkThemeEnabled);
 
   @override
@@ -38,10 +39,11 @@ class MyHomePage extends StatelessWidget {
       child: Carousel(
         boxFit: BoxFit.fill,
         images: [
-          AssetImage('images/movie1.jpg'),
-          AssetImage('images/movie2.jpg'),
-          AssetImage('images/movie3.jpg'),
-          AssetImage('images/movie4.jpg'),
+          AssetImage('images/op1.jpg'),
+          AssetImage('images/op2.jpg'),
+          AssetImage('images/op3.jpg'),
+          AssetImage('images/op4.jpg'),
+          AssetImage('images/op5.jpg'),
         ],
         autoplay: true,
         indicatorBgPadding: 1.0,
@@ -111,7 +113,21 @@ class MyHomePage extends StatelessWidget {
                   value: darkThemeEnabled,
                   onChanged: bloc.changeTheme,
                 ),
-              )
+              ),
+
+              ListTile(
+                title: Text('Camera'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CameraPage()),
+                  );
+                },
+              ),
+
+
+
+
               /*ListTile(
                 title: Text('Emergency SOS'),
                 onTap: (){
@@ -470,18 +486,11 @@ class LoginFormState extends State<LoginForm> {
 /*class GetLocationPage extends StatefulWidget {
   @override
   _GetLocationPageState createState() => _GetLocationPageState();
-
 }
-
 class _GetLocationPageState extends State<GetLocationPage> {
-
   var location = new Location();
   var myFile = new File('C:\\Users\\Asus\\AndroidStudioProjects\\flutter_app\\file.txt');
-
-
   Map<String, double> userLocation;
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -508,7 +517,6 @@ class _GetLocationPageState extends State<GetLocationPage> {
                 },
                 color: Colors.blue,
                 child: Text("Get Location", style: TextStyle(color: Colors.white),),
-
               ),
             ),
           ],
@@ -516,7 +524,6 @@ class _GetLocationPageState extends State<GetLocationPage> {
       ),
     );
   }
-
   Future<Map<String, double>> _getLocation() async {
     var currentLocation = <String, double>{};
     try {
@@ -527,18 +534,13 @@ class _GetLocationPageState extends State<GetLocationPage> {
     return currentLocation;
   }
 }
-
 class ListenPage extends StatefulWidget {
   @override
   _ListenPageState createState() => _ListenPageState();
 }
-
 class _ListenPageState extends State<ListenPage> {
-
   Location location = Location();
-
   Map<String, double> currentLocation;
-
   @override
   void initState() {
     // TODO: implement initState
@@ -549,7 +551,6 @@ class _ListenPageState extends State<ListenPage> {
       });
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -599,6 +600,101 @@ class _ContactsState extends State<Contacts> {
     );
   }
 }
+
+
+class CameraPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CameraOpened(),
+    );
+  }
+}
+
+class CameraOpened extends StatefulWidget {
+  @override
+  CameraOpenedState createState() {
+    return CameraOpenedState();
+  }
+}
+
+class CameraOpenedState extends State<CameraOpened>{
+  File imageFile;
+
+  _openGallery(BuildContext context) async{
+    imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    this.setState(() {
+
+    });
+    Navigator.of(context).pop();
+  }
+  _openCamera(BuildContext context) async{
+    imageFile = await ImagePicker.pickImage(source: ImageSource.camera);
+    this.setState(() {
+
+    });
+    Navigator.of(context).pop();
+  }
+
+  Future<void> showChoiceDialog(BuildContext context){
+    return showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        title: Text('Make a choice!'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              GestureDetector(
+                child: Text("Gallery"),
+                onTap: (){
+                  _openGallery(context);
+                },
+              ),
+              Padding(padding: EdgeInsets.all(8.0),),
+              GestureDetector(
+                child: Text("Camera"),
+                onTap: (){
+                  _openCamera(context);
+                },
+              )
+            ]
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _decideImageView(){
+    if(imageFile == null){
+      return Text("No image selected!");
+    }
+    else {
+      return Image.file(imageFile, width: 400, height: 400);
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Add an Image"),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            _decideImageView(),
+            RaisedButton(onPressed: (){
+               showChoiceDialog(context);
+            }, child: Text("Select image!"),)
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 
 class Bloc {
   final _themeController = StreamController<bool>();
